@@ -16,8 +16,8 @@ public class ConexionHTTP {
 
     private final static String MethodDominio = "https://";   
     private final static String URLDominio = "backend.look4family.com";    
-    private final static String URLConexionProduccion = MethodDominio + URLDominio + "/TFM_Ciberseguridad/";  // Desde el emulador.
-    private final static String URLConexionDesarrollo = "http://192.168.1.108:8080/TFM_Ciberseguridad/";  // Desde el emulador.
+    private final static String URLConexionProduccion = MethodDominio + URLDominio + "/UCAM_TFM_Ciberseguridad_Server/";  // Desde el emulador.
+    private final static String URLConexionDesarrollo = "http://localhost:8081/UCAM_TFM_Ciberseguridad_Server/";  // Desde el emulador.
 
     public final static String GET = "GET";
     public final static String POST = "POST";
@@ -31,7 +31,6 @@ public class ConexionHTTP {
 
         HttpURLConnection con = null;
         StringBuffer cadena = new StringBuffer();
-        long tiempo = System.currentTimeMillis();
 
         try {
 

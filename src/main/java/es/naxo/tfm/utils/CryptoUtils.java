@@ -20,15 +20,12 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
-import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -39,7 +36,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.List;
-import java.util.Properties;
 
 import es.naxo.tfm.aws.PrivateKeyReader;
 
@@ -48,7 +44,6 @@ import es.naxo.tfm.aws.PrivateKeyReader;
  * certificate from the resource files.
  */
 public class CryptoUtils {
-    private static final String PropertyFile = "aws-iot-sdk-samples.properties";
 
     public static class KeyStorePasswordPair {
         public KeyStore keyStore;
@@ -57,25 +52,6 @@ public class CryptoUtils {
         public KeyStorePasswordPair(KeyStore keyStore, String keyPassword) {
             this.keyStore = keyStore;
             this.keyPassword = keyPassword;
-        }
-    }
-
-    public static String getConfig(String name) {
-        Properties prop = new Properties();
-        URL resource = CryptoUtils.class.getResource(PropertyFile);
-        if (resource == null) {
-            return null;
-        }
-        try (InputStream stream = resource.openStream()) {
-            prop.load(stream);
-        } catch (IOException e) {
-            return null;
-        }
-        String value = prop.getProperty(name);
-        if (value == null || value.trim().length() == 0) {
-            return null;
-        } else {
-            return value;
         }
     }
 
@@ -90,6 +66,12 @@ public class CryptoUtils {
             return null;
         }
         //System.out.println("Cert file:" +certificateFile + " Private key: "+ privateKeyFile);
+
+        File file = new File(privateKeyFile);
+        if (!file.exists()) {
+            //System.out.println("Primary Key file: " + filename + " is not found.");
+            return null;
+        }
 
         PrivateKey privateKey = null;
         try    {
@@ -187,5 +169,4 @@ public class CryptoUtils {
 
         return privateKey;
     }
-
 }

@@ -1,7 +1,5 @@
 package es.naxo.tfm.utils;
 
-import com.amazonaws.services.iot.client.AWSIotException;
-
 public class Log {
 
 	public static void escribirLog (String texto)    {
@@ -14,7 +12,7 @@ public class Log {
 		System.err.print(texto);
 		int i = 0; 
 		
-        while (i < 0) {
+        while (i < 5) {
 
             System.err.print(".");
 

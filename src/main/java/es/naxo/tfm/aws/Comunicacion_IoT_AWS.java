@@ -9,9 +9,9 @@ import es.naxo.tfm.utils.Constantes;
 import es.naxo.tfm.utils.CryptoUtils;
 import es.naxo.tfm.utils.CryptoUtils.KeyStorePasswordPair;
 
-public class Publicar_IoT_AWS {
+public class Comunicacion_IoT_AWS {
 
-    private static String testTopic = null;
+    private static String nombreTopic = null;
     private final static AWSIotQos TestTopicQos = AWSIotQos.QOS0;
     private static AWSIotMqttClient awsIotClient;
 
@@ -19,42 +19,15 @@ public class Publicar_IoT_AWS {
         awsIotClient = client;
     }
 
-    public static class BlockingPublisher implements Runnable {
-        private final AWSIotMqttClient awsIotClient;
-
-        public BlockingPublisher(AWSIotMqttClient awsIotClient) {
-            this.awsIotClient = awsIotClient;
-        }
-
-        @Override
-        public void run() {
-            long counter = 1;
-
-            while (true) {
-                String payload = "hello from blocking publisher - " + (counter++);
-                System.out.println(System.currentTimeMillis() + ": >>> " + payload);
-                try {
-                    awsIotClient.publish(testTopic, payload);
-                } catch (AWSIotException e) {
-                    System.out.println(System.currentTimeMillis() + ": publish failed for " + payload);
-                }
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    System.out.println(System.currentTimeMillis() + ": BlockingPublisher was interrupted");
-                    return;
-                }
-            }
-        }
-    }
-
+    /*  
+     * Metodo de inicialización de la conexión con AWS IoT.
+     */
     private static void initClient(String idDevice) {
     	
         String clientEndpoint = "a17jj5x2zjeivl.iot.eu-central-1.amazonaws.com";
         String clientId = "Rasperry_" + idDevice;
         
-        testTopic = "$aws/things/" + clientId + "/shadow/update";
+        nombreTopic = "$aws/things/" + clientId + "/shadow/update";
 
     	if (awsIotClient == null)  {
 
@@ -68,6 +41,10 @@ public class Publicar_IoT_AWS {
     	}
     }
 
+    /*
+     * Una vez validado que hay conexión con AWS y el certificado es correcto, lanza el proceso en sí de la Rasperry, que es enviar
+     * de manera continua la temperatura, y validar mediante suscripción que el mensaje está llegando al Topic. 
+     */
     public static void enviarTemperaturaContinuo (String idDevice)    {
         
         initClient(idDevice);
@@ -76,10 +53,10 @@ public class Publicar_IoT_AWS {
         	
 	        awsIotClient.connect();
 	
-	        AWSIotTopic topic = new TestTopicListener(testTopic, TestTopicQos);
+	        AWSIotTopic topic = new SuscriptorListener(nombreTopic, TestTopicQos);
 	        awsIotClient.subscribe(topic, true);
 	
-	        Thread blockingPublishThread = new Thread(new BlockingPublisher(awsIotClient));
+	        Thread blockingPublishThread = new Thread(new PublicadorMensaje (awsIotClient, nombreTopic));
 	
 	        blockingPublishThread.start();
 	        blockingPublishThread.join();
@@ -103,6 +80,10 @@ public class Publicar_IoT_AWS {
        }
     }
     
+    /*
+     * Realiza una prueba de conexión y publicacion de un mensaje en el Topic de AWS. Para validar inicialmente si hay conexión, 
+     * y si el certificado es valido. En caso contrario, lanzará el proceso de Bootstrapping. 
+     */
     public static boolean pruebaEnviarTemperatura (String idDevice)   {
             
         initClient(idDevice);
@@ -115,11 +96,8 @@ public class Publicar_IoT_AWS {
         	
         	awsIotClient.connect();
 
-        	AWSIotTopic topic = new TestTopicListener(testTopic, TestTopicQos);
-        	awsIotClient.subscribe(topic, true);
-
         	String payload = "Prueba de envio de mensaje...";
-            awsIotClient.publish(testTopic, payload);
+            awsIotClient.publish(nombreTopic, payload);
         } 
             
         catch (AWSIotException exception) {
