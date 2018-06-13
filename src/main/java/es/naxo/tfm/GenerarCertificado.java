@@ -1,8 +1,6 @@
 package es.naxo.tfm;
 
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -103,64 +101,19 @@ public class GenerarCertificado    {
 	}
 	
 	/*
-	 * Una vez recibido el certificado firmado, lo grabará a disco en el dispositivo, para poder usarlo posteriormente en la comunicación
-	 * con AWS. 
-	 * Además del certificado, le concatena después la clave publica de nuestra CA, para que después funcione el autoregistro y activación 
-	 * de certificados en AWS. 
+	 * Una vez recibido el certificado firmado + la clave publica de la CA, lo grabará a disco en el dispositivo, para poder 
+	 * usarlo posteriormente en la comunicación con AWS. 
 	 */
 	public boolean grabarCertificadoFirmado (String certificadoFirmado)    {
 		
-	    // Cargo el contenido de la clave publica de la CA, que lo concatenaré junto con el certificado firmado.
-		String clavePublicaCAEnTexto = null;
-		FileInputStream fileInput = null;
-	    
-	    try		{
-			
-			fileInput = new FileInputStream(Constantes.certificateCAFile);
-			
-			byte [] array = new byte[10000];
-			int leidos = fileInput.read(array);
-
-			if (leidos >=10000 || leidos <= 0)    {
-				System.err.println("Error al leer el fichero de la CA. Leidos: " + leidos);
-			}
-
-			clavePublicaCAEnTexto = new String (array, 0, leidos, StandardCharsets.UTF_8);
-	    	fileInput.close();	
-		}
-
-	    catch (Exception e)		{
-			System.err.println("Excepcion al cargar la clave publica de la CA de su fichero");
-			e.printStackTrace();
-			return false; 
-		}
-		
-	    // Ahora grabamos en el fichero tanto el certificado firmado que nos han devuelto, como la clave publica de la CA, para que luego sea compatible con 
-	    // el autoregistro de certificados en AWS. 
 	    try    {
 
 	    	byte[] cert = certificadoFirmado.getBytes();
 	    	FileOutputStream fos = new FileOutputStream(Constantes.certificadoFirmadoDevice);
-
-	    	fos.write("-----BEGIN CERTIFICATE-----\n".getBytes("UTF-8"));
-
-	    	int lineas = cert.length / 64;
-		    for (int i = 0; i < lineas; i++)    {
-			    fos.write(cert, i*64, 64);
-	    		fos.write ("\n".getBytes());
-		    }
-
-	    	if (cert.length % 64 > 0)    {
-	    		fos.write(cert, lineas*64, cert.length % 64);
-	    	}
-		    
-		    fos.write("\n-----END CERTIFICATE-----\n".getBytes("UTF-8"));
-		    
-		    // Después le concateno la clave publica de la CA, ya que será necesaria para que en AWS podamos autoregistrar el certificado. 
-		    fos.write(clavePublicaCAEnTexto.getBytes());
-		    
+		    fos.write(cert);
 		    fos.close();
 	    }
+	    
 		catch (Exception e)		{
 			System.err.println("Excepcion al grabar el certificado firmado en el fichero de salida");
 		    e.printStackTrace();

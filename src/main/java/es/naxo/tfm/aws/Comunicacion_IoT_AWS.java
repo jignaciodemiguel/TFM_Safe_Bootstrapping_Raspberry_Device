@@ -8,26 +8,30 @@ import com.amazonaws.services.iot.client.AWSIotTopic;
 import es.naxo.tfm.utils.Constantes;
 import es.naxo.tfm.utils.CryptoUtils;
 import es.naxo.tfm.utils.CryptoUtils.KeyStorePasswordPair;
+import es.naxo.tfm.utils.Log;
 
 public class Comunicacion_IoT_AWS {
 
-    private static String nombreTopic = null;
+    private String nombreTopic = null;
+    private String nombreTopicAlertas = null;
+    
     private final static AWSIotQos TestTopicQos = AWSIotQos.QOS0;
-    private static AWSIotMqttClient awsIotClient;
+    private AWSIotMqttClient awsIotClient;
 
-    public static void setClient(AWSIotMqttClient client) {
+    public void setClient(AWSIotMqttClient client) {
         awsIotClient = client;
     }
 
     /*  
      * Metodo de inicialización de la conexión con AWS IoT.
      */
-    private static void initClient(String idDevice) {
+    private void initClient(String idDevice) {
     	
         String clientEndpoint = "a17jj5x2zjeivl.iot.eu-central-1.amazonaws.com";
         String clientId = "Rasperry_" + idDevice;
         
-        nombreTopic = "$aws/things/" + clientId + "/shadow/update";
+        nombreTopic = "$aws/things/" + clientId + "/comunicarTemperatura";
+        nombreTopicAlertas = "$aws/things/" + clientId + "/alertas";
 
     	if (awsIotClient == null)  {
 
@@ -45,7 +49,7 @@ public class Comunicacion_IoT_AWS {
      * Una vez validado que hay conexión con AWS y el certificado es correcto, lanza el proceso en sí de la Rasperry, que es enviar
      * de manera continua la temperatura, y validar mediante suscripción que el mensaje está llegando al Topic. 
      */
-    public static void enviarTemperaturaContinuo (String idDevice)    {
+    public void enviarTemperaturaContinuo (String idDevice)    {
         
         initClient(idDevice);
 
@@ -53,11 +57,20 @@ public class Comunicacion_IoT_AWS {
         	
 	        awsIotClient.connect();
 	
-	        AWSIotTopic topic = new SuscriptorListener(nombreTopic, TestTopicQos);
-	        awsIotClient.subscribe(topic, true);
-	
+	        //AWSIotTopic topic = new SuscriptorListener(nombreTopic, TestTopicQos);
+	        Log.escribirLogPuntosSinLinea("Suscribiendo dispositivo a Topic de alertas: '" + nombreTopicAlertas + "'");
+
+	        AWSIotTopic topicAlertas = new SuscriptorListener(nombreTopicAlertas, TestTopicQos);
+	        awsIotClient.subscribe(topicAlertas, true);
+	        
+	        Log.escribirLog("OK");
+	        
+	        Log.escribirLogPuntosSinLinea("Iniciando envíos de temperatura a Topic: '" + nombreTopic + "'");
+
 	        Thread blockingPublishThread = new Thread(new PublicadorMensaje (awsIotClient, nombreTopic));
-	
+
+	        Log.escribirLog("OK");
+
 	        blockingPublishThread.start();
 	        blockingPublishThread.join();
         }
@@ -84,7 +97,7 @@ public class Comunicacion_IoT_AWS {
      * Realiza una prueba de conexión y publicacion de un mensaje en el Topic de AWS. Para validar inicialmente si hay conexión, 
      * y si el certificado es valido. En caso contrario, lanzará el proceso de Bootstrapping. 
      */
-    public static boolean pruebaEnviarTemperatura (String idDevice)   {
+    public boolean pruebaEnviarTemperatura (String idDevice)   {
             
         initClient(idDevice);
 
@@ -104,7 +117,19 @@ public class Comunicacion_IoT_AWS {
             System.err.println("Error al suscribirse / publicar en el Topic de AWS");
             return false; 
         }
-        
+
+        finally   {
+     	   try    {
+     		   if (awsIotClient != null)    {
+     			   awsIotClient.disconnect();
+     		   }
+     	   }
+     	   catch (Exception ex)    {
+ 	    	   System.err.println ("Excepcion al desconectar el cliente");
+ 	    	   ex.printStackTrace();
+ 	       }
+        }
+
         return true; 
     }
 }

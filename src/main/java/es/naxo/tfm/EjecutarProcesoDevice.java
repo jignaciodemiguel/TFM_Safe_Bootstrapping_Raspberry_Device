@@ -33,8 +33,6 @@ public class EjecutarProcesoDevice {
 	 */
 	public void ejecutarProceso()    {
 
-		Log.escribirLog("\n\nInicializando dispositivo\n");
-		
 		// Obtengo el serial number, que será el identificador del dispositivo de cara a la validación contra AWS. 
 		String idDevice = GenerarIdentificadorUnico.getSerialNumber();
 
@@ -44,21 +42,14 @@ public class EjecutarProcesoDevice {
 		if (exito == false)   {
 			exito = inicializarBootstrapping();
 
-			if (exito == true)    {
-				Log.escribirLog("\nProceso Bootstrapping concluido con exito");
-			}
-			else    {
-				Log.escribirLog("\nError en proceso Bootstrapping. Imposible iniciar comunicación con plataforma AWS IoT");
+			if (exito == false)    {
 				return; 
 			}
-		}
-		else   {
-			Log.escribirLog(" OK");
 		}
 
 		Log.escribirLogPuntos("\nIniciando proceso de envío continuo de temperaturaT");
 
-		Comunicacion_IoT_AWS.enviarTemperaturaContinuo (idDevice);
+		new Comunicacion_IoT_AWS().enviarTemperaturaContinuo (idDevice);
 	}
 	
 	/*
@@ -122,6 +113,19 @@ public class EjecutarProcesoDevice {
 			}
 
 			Log.escribirLogPuntos("  - Dado de alta el Device en AWS");
+			
+			// Hago una prueba de publicación en AWS, para validar que el certificado es correcto. 
+			Log.escribirLogPuntosSinLinea("  - Estableciendo conexión de validacion con Plataforma AWS IoT");
+
+			boolean exito = new Comunicacion_IoT_AWS().pruebaEnviarTemperatura(idDevice);
+
+			if (exito == false)   {
+		    	Log.escribirLog("KO");
+		    	Log.escribirLog("\nValidación de conexion incorrecta. No se puede conectar con la Plataforma AWS IoT");
+	    		return false; 
+			}
+
+	    	Log.escribirLog("OK");
 			Log.escribirLog("\nProceso de Bootstrapping ejecutado con éxito");
 		}
 		
@@ -162,7 +166,7 @@ public class EjecutarProcesoDevice {
 		// Obtengo el serial number, que será el identificador del dispositivo de cara a la validación contra AWS. 
 		String idDevice = GenerarIdentificadorUnico.getSerialNumber();
 		
-		boolean exito = Comunicacion_IoT_AWS.pruebaEnviarTemperatura(idDevice);
+		boolean exito = new Comunicacion_IoT_AWS().pruebaEnviarTemperatura(idDevice);
 
 		if (exito == false)   {
 	    	Log.escribirLog("KO");
@@ -249,9 +253,10 @@ public class EjecutarProcesoDevice {
 	 */
 	public static void main(String[] args) {
 
-		EjecutarProcesoDevice ejecutar = new EjecutarProcesoDevice();
+		// Establezco la propiedad para que cargue el logging.properties. 
+		System.setProperty("java.util.logging.config.file", "logging.properties");
 		
-		//args = new String[1]; args[0] = "--reset";
+		EjecutarProcesoDevice ejecutar = new EjecutarProcesoDevice();
 		
 		if (args.length != 1)    {
 			ejecutar.pintaOpciones();
@@ -287,12 +292,13 @@ public class EjecutarProcesoDevice {
 	}
 
 	private void pintaOpciones()    {
-		System.out.println("Error al lanzar el ejecutable. Parametros incorrectos: ");
-		System.out.println("\n");
-		System.out.println("   --exec   Ejecuta el proceso completo de envio continuo de temperatura");
-		System.out.println("   --boot   Ejecuta el proceso de bootstrapping, para dejar el dispositivo preparado para la comunicación");
-		System.out.println("   --reset   Resetea la configuración para dejar el dispositivo con la configuración inicial");
-		System.out.println("   --conf   Valida la configuración para comprobar si está preparado para iniciar la comunicación de la temperatura");
+		System.out.println("\nError al lanzar el ejecutable. Opción incorrecta: ");
+		System.out.println("\n  Uso: gestorTemperatura.sh [opciones]");
+		System.out.println("\n  Opciones:\n");
+		System.out.println("    --exec    Ejecuta el proceso completo de envio continuo de temperatura");
+		System.out.println("    --boot    Ejecuta el proceso de bootstrapping, para dejar el dispositivo preparado para la comunicación");
+		System.out.println("    --reset   Resetea la configuración para dejar el dispositivo con la configuración inicial");
+		System.out.println("    --conf    Valida la configuración para comprobar si está preparado para iniciar la comunicación de la temperatura");
 		System.out.println("\n");
 	}
 }

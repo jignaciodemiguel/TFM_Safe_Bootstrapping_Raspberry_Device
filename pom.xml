@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.naxo</groupId>
-	<artifactId>UCAM_TFM_Ciberseguridad_Device</artifactId>
+	<artifactId>TFM_Safe_Bootstrapping_Raspberry_Device</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0-SNAPSHOT</version>
 	<name>Proceso Java Bootstrapping TFM</name>
@@ -64,9 +64,11 @@
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
+					 <finalName>${project.artifactId}-full</finalName>
+			        <appendAssemblyId>false</appendAssemblyId>
 				</configuration>
     		</plugin>
 		</plugins>
-		<finalName>UCAM_TFM_Ciberseguridad_Device</finalName>
+		<finalName>TFM_Safe_Bootstrapping_Raspberry_Device</finalName>
 	</build>
 </project>
