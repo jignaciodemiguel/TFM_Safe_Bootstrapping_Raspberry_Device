@@ -29,10 +29,10 @@ public class GenerarIdentificadorUnico {
 		boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
 
 		if (isWindows == true)    {
-			return "00000000ba45e2af";    // Ejemplo de Serial Number de Rasperry. 
+			return "00000000FFFFFFFF";    // Ejemplo de Serial Number de Rasperry. 
 		}
 		
-		String command = "cat /proc/cpuinfo |grep Serial|cut -d' ' -f2";
+		String command = "cat /proc/cpuinfo";
 		
 		Process p;
 		String serialNumber = null; 
@@ -41,19 +41,27 @@ public class GenerarIdentificadorUnico {
 			p = Runtime.getRuntime().exec(command);
 			p.waitFor();
 		
-			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		    String line;
+		    BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		    while ((line = input.readLine()) != null) {
+		    	if (line.contains("Serial"))    {
+		    		String textos[] = line.split(":");
+		    		serialNumber = textos[1].trim();
+		        }
+		    }
 
-            serialNumber = reader.readLine();			
-
-            if (serialNumber == null)    {
-            	System.err.println("Error al obtener el Serial Number del dispositivo");
-            	return null;
-            }
+		    input.close();	
 		} 
 		
 		catch (Exception e) {
 			System.err.println("Excepcion al obtener el Serial Number del dispositivo");
 			e.printStackTrace();
+		}
+		
+		if (serialNumber == null || "".equals(serialNumber))    {
+			
+			// Si no hay Serial Number es que estamos simulando en un dispositivo NO Rasperry, enviamos el de Test
+			return "00000000FFFFFFFF";
 		}
 		
         return serialNumber; 
@@ -67,6 +75,10 @@ public class GenerarIdentificadorUnico {
 		
 		// Primero obtenemos el serial number de la Rasperry. 
 		String identificadorClaro = getSerialNumber();
+		
+		if (identificadorClaro == null)    {
+			return null; 
+		}
 		
 		// Le concatemos los secretos compartidos, uno por delante y el otro por detrás. 
 		identificadorClaro = claveSecretoCompartido1 + identificadorClaro + claveSecretoCompartido2;
