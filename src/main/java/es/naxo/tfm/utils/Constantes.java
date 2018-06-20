@@ -2,8 +2,7 @@ package es.naxo.tfm.utils;
 
 public class Constantes {
 
-	//public static final String rutaKeyStore = "C:\\Users\\Nacho\\OneDrive\\Java\\Proyectos\\UCAM_TFM_Ciberseguridad_Device\\ks\\";
-	public static final String rutaKeyStore = System.getProperty("user.dir") + "\\ks\\";
+	public static final String rutaKeyStore = System.getProperty("user.dir") + "/ks/";
 	
 	public static final String certificadoFirmadoDevice = rutaKeyStore + "certificadoFirmadoDevice_CA.crt"; 
 	public static final String certificadoCSRDevice = rutaKeyStore + "certificadoFirmadoDevice_CA.csr"; 
