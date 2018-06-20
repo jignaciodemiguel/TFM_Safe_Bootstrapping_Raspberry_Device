@@ -235,7 +235,7 @@ public class EjecutarProcesoDevice {
         parametros.put ("identificador", identificadorUnico);
         parametros.put ("csr", csr);
 
-        String respuesta = ConexionHTTP.peticion("BootstrappingRasperryServlet", ConexionHTTP.POST, parametros);
+        String respuesta = ConexionHTTP.peticion("BootstrappingRaspberryServlet", ConexionHTTP.POST, parametros);
 
         if (respuesta == null || respuesta.startsWith("KO"))   {
 

@@ -16,8 +16,8 @@ public class ConexionHTTP {
 
     private final static String MethodDominio = "https://";   
     private final static String URLDominio = "backend.look4family.com";    
-    private final static String URLConexionProduccion = MethodDominio + URLDominio + "/UCAM_TFM_Ciberseguridad_Server/";  // Desde el emulador.
-    private final static String URLConexionDesarrollo = "http://localhost:8081/UCAM_TFM_Ciberseguridad_Server/";  // Desde el emulador.
+    private final static String URLConexionProduccion = MethodDominio + URLDominio + "/TFM_Safe_Bootstrapping_Raspberry_Server/";  // Desde el emulador.
+    private final static String URLConexionDesarrollo = "http://localhost:8081/TFM_Safe_Bootstrapping_Raspberry_Server/";  // Desde el emulador.
 
     public final static String GET = "GET";
     public final static String POST = "POST";
