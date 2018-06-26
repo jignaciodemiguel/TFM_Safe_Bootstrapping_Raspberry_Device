@@ -17,11 +17,14 @@ public class ConexionHTTP {
     private final static String MethodDominio = "https://";   
     private final static String URLDominio = "backend.look4family.com";    
     private final static String URLConexionProduccion = MethodDominio + URLDominio + "/TFM_Safe_Bootstrapping_Raspberry_Server/";  // Desde el emulador.
-    private final static String URLConexionDesarrollo = "http://localhost:8081/TFM_Safe_Bootstrapping_Raspberry_Server/";  // Desde el emulador.
+    private final static String URLConexionDesarrollo = "http://localhost:8081/UCAM_TFM_Ciberseguridad_Server/";  // Desde el emulador.
 
     public final static String GET = "GET";
     public final static String POST = "POST";
-    private final static String KO_EXCEPTION = "KO";
+    
+    private final static String KO_400 = "KO_400";
+    private final static String KO_403 = "KO_403";
+    private final static String KO_500 = "KO_500";
 
     public static String peticion (String URLServicio, String method, HashMap<String, String> parametros) {
         return peticion(URLServicio, method, parametros, false);
@@ -96,14 +99,10 @@ public class ConexionHTTP {
                 wr.close();
             }
 
-            // Obtener el estado del recurso
+            // Obtener el codigo de error de la respuesta. Cada codigo de error, por la definición del API, implica un tratamiento diferente. 
             int statusCode = con.getResponseCode();
-            if (statusCode != 200) {
-                System.err.println ("Error al ejecutar el servicio" + URLServicio + " StatusCode: " + statusCode);
-                return KO_EXCEPTION;
-            }
             
-            else {
+            if (statusCode == 200)   {
 
                 //Get Response
                 BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
@@ -121,24 +120,34 @@ public class ConexionHTTP {
                 //Log.e(TAG, "La respuesta (" + (System.currentTimeMillis() - tiempo) + ") al servicio " + URLServicio + " es buena "); // + response);
                 return response.toString();
             }
+            
+            else if (statusCode == 400)   {
+            	return KO_400;
+            }
+            else if (statusCode == 403)    {
+            	return KO_403; 
+            }
+            else   {
+            	return KO_500;
+            }
         }
 
         catch (MalformedURLException ex) {
         	System.err.println ("MalformedURLException al crear la URL para el servicio: " + URLServicio + " ");
         	ex.printStackTrace();
-            return KO_EXCEPTION;
+        	return KO_500;
         }
 
         catch (IOException ex) {
         	System.err.println ("IOExcepcion al contactar con la URL del servicio: " + URLServicio + " ");
         	ex.printStackTrace();
-            return KO_EXCEPTION;
+        	return KO_500;
         }
 
         catch (Exception ex) {
         	System.err.println ("Excepcion generica al conectar con el servicio " + URLServicio + " ");
         	ex.printStackTrace();
-        	return KO_EXCEPTION;
+        	return KO_500;
         }
 
         finally {

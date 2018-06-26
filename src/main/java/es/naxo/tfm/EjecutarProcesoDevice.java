@@ -240,8 +240,17 @@ public class EjecutarProcesoDevice {
         if (respuesta == null || respuesta.startsWith("KO"))   {
 
         	// Si entro es porque el resultado fue incorrecto.
-			Log.escribirLog ("  - Error en el proceso de firma del certificado");
-			return null;
+        	if ("KO_400".equals(respuesta))   {
+        		Log.escribirLog ("  - Error en el proceso de firma del certificado. Parametros enviados erroneos");
+        	}
+        	else if ("KO_403".equals(respuesta))   {
+        		Log.escribirLog ("  - Error en el proceso de firma del certificado. Serial Number no valido o ya registrado");
+        	}
+        	else    {
+        		Log.escribirLog ("  - Error interno en el proceso de firma del certificado.");
+        	}
+        		
+        	return null;
         }
         
         // Todo ha ido bien, devolvemos el certificado firmado.
