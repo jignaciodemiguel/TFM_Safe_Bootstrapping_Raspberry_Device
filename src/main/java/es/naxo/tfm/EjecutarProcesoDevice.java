@@ -302,7 +302,6 @@ public class EjecutarProcesoDevice {
 
 	private void pintaOpciones()    {
 		System.out.println("\nError al lanzar el ejecutable. Opción incorrecta: ");
-		System.out.println("\n  Uso: gestorTemperatura.sh [opciones]");
 		System.out.println("\n  Opciones:\n");
 		System.out.println("    --exec    Ejecuta el proceso completo de envio continuo de temperatura");
 		System.out.println("    --boot    Ejecuta el proceso de bootstrapping, para dejar el dispositivo preparado para la comunicación");
